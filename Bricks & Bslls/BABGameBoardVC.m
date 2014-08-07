@@ -9,12 +9,13 @@
 #import "BABGameBoardVC.h"
 #import "BABHeaderView.h"
 
-//// 3 lives
-//// after you hit floor start new ball and take away one life
-//// once all 3 lives lost, game over alert, wtih option to restart (should restart life count)
+//// when gameover clear bricks and show start button /
+//// creata new class called "BABLevelData" as a subclass of NSObject
 
-//// score count, bricks broken add points to score count
-//// create temporay label for score count
+//// make a method that will drop a UIView (gravity) from a broken brick like a powerup
+//// listen for it to collide with paddle
+//// randonly change size of paddle when powerup hit paddle
+
 
 @interface BABGameBoardVC () <UICollisionBehaviorDelegate, UIAlertViewDelegate>
 @end
@@ -29,17 +30,13 @@
     UICollisionBehavior *collisionBehavior;
     UIAttachmentBehavior *attachmentBehavior;
     
+    UIButton *startButton;
+    
     UIView *ball;
     UIView *paddle;
     
-//    int Lives;
-//    int scoreBoard;
-    
     BABHeaderView *headerView;
-    
-//    UILabel *scoreBoard;
-//    UILabel *ballCount;
-//
+
     NSMutableArray *bricks;
 }
 
@@ -65,7 +62,7 @@
         [animator addBehavior:gravityBehavior];
        
         collisionBehavior = [[UICollisionBehavior alloc]init];
-//        collisionBehavior.translatesReferenceBoundsIntoBoundary = YES;
+//      collisionBehavior.translatesReferenceBoundsIntoBoundary = YES;
         
         // create own boundary to know when it hits the ground
         [collisionBehavior addBoundaryWithIdentifier:@"floor" fromPoint:CGPointMake(0, SCREEN_HEIGHT) toPoint:CGPointMake(SCREEN_WIDTH, SCREEN_HEIGHT + 20)];
@@ -80,21 +77,10 @@
         brickItemBehavior.density = 1000000;
         [animator addBehavior:brickItemBehavior];
         
-//        Lives = 3;
-//        score = 0;
-        
         // alloc/init from the BAB Header View - so I can access its @property
         headerView = [[BABHeaderView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 40)];
         [self.view addSubview:headerView];
-//        
-//        scoreBoard = [[UILabel alloc]initWithFrame:CGRectMake(10,SCREEN_HEIGHT - 215, 100, 30)];
-//        scoreBoard.text = @"Score: 0";
-//        [self.view addSubview:scoreBoard];
-//        
-//        ballCount = [[UILabel alloc]initWithFrame:CGRectMake(10,SCREEN_HEIGHT - 195, 100, 30)];
-//        ballCount.text = @"Lives: 3";
-//        [self.view addSubview:ballCount];
-//    
+ 
        
         
     
@@ -107,15 +93,28 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    
     paddle = [[UIView alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - 100) / 2.0, SCREEN_HEIGHT - 10, 100, 4)];
     paddle.backgroundColor = [UIColor darkGrayColor];
     [self.view addSubview:paddle];
     
-    [self resetBricks];
+    startButton = [[UIButton alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - 100) / 2.0, (SCREEN_HEIGHT - 100) / 2.0, 100, 100)];
+    [startButton setTitle:@"START" forState:UIControlStateNormal];
+    [startButton addTarget:self action:@selector(startGame) forControlEvents:UIControlEventTouchUpInside];
+    startButton.layer.cornerRadius = 50;
+    startButton.backgroundColor = [UIColor darkGrayColor];
+    [self.view addSubview:startButton];
+    
+//    [self resetBricks];
     
 }
 
+- (void)startGame
+{
+    [startButton removeFromSuperview];
+    
+    [self createNewBall];
+    [self resetBricks];
+}
 
 - (void)viewWillAppear:(BOOL)animated
 {
@@ -134,7 +133,6 @@
     [collisionBehavior addItem:paddle];
     [brickItemBehavior addItem:paddle];
     
-     [self createNewBall];
     
 }
 
@@ -180,7 +178,16 @@
         if ([item1 isEqual:brick] || [item2 isEqual:brick])
         {
             headerView.score +=100;
-//            scoreBoard.text = [NSString stringWithFormat:@"Score: %d",headerView.score];
+            
+            // powerUp creation
+            UIView *powerupObjects = [[UIView alloc]initWithFrame:CGRectMake(brick.center.x,brick.center.y, 20, 20)];
+            powerupObjects.backgroundColor = [UIColor greenColor];
+            powerupObjects.layer.cornerRadius = 10;
+            [self.view addSubview:powerupObjects];
+            [gravityBehavior addItem:powerupObjects];
+
+            
+            int random = arc4random_uniform(10);
             
             [collisionBehavior removeItem:brick];
             [gravityBehavior addItem:brick];
@@ -188,33 +195,31 @@
             [bricks removeObjectIdenticalTo:brick];
             
             [UIView animateWithDuration:0.3 animations:^{
-                brick.alpha = 0;
+            brick.alpha = 0;
+            
+
             } completion:^(BOOL finished) {
+                
                 [brick removeFromSuperview];
-                
-               
-                
-                
             }];
-            
-            
         }
     }
 }
 
 - (void)resetBricks
 {
-    
-    for (UIView *brick in bricks) {
+    // brick removal
+    for (UIView *brick in bricks)
+    {
         [brick removeFromSuperview];
         [collisionBehavior removeItem:brick];
         [brickItemBehavior removeItem:brick];
         
     }
+    // brick layout creation
     int colCount = 7;
     int rowCount = 4;
     int brickSpacimg = 8;
-    //    int ballCount = 3;
     
     for (int col = 0; col < colCount; col++)
     {
@@ -252,7 +257,7 @@
     
     // VIEW WILL APPEAR - that the init method may not have finished
     UIPushBehavior *pushBehavior = [[UIPushBehavior alloc]initWithItems:@[ball] mode:UIPushBehaviorModeInstantaneous];
-    pushBehavior.pushDirection = CGVectorMake(0.05, -0.05);
+    pushBehavior.pushDirection = CGVectorMake(0.08, -0.08);
     [animator addBehavior:pushBehavior];
     
     [collisionBehavior addItem:ball];
@@ -269,13 +274,21 @@
     else
     {
         // reset the game
-        [self createNewBall];
-        [self resetBricks];
         headerView.score = 0;
-//        scoreBoard.text = @"Score: 0";
         headerView.lives = 3;
-//        ballCount.text = @"Lives: 3";
         
+        [self.view addSubview:startButton];
+        
+        // re-center the paddle when reseted
+        attachmentBehavior.anchorPoint = CGPointMake(SCREEN_WIDTH / 2.0, paddle.center.y);
+    
+        for (UIView *brick in bricks)
+        {
+            [brick removeFromSuperview];
+            [collisionBehavior removeItem:brick];
+            [brickItemBehavior removeItem:brick];
+    
+        }
 
     }
 }

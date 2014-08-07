@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2611E8F71993E07600624CB2 /* BABLevelData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2611E8F61993E07600624CB2 /* BABLevelData.m */; };
 		2674A6CE1993BA05004066E1 /* BABHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2674A6CD1993BA05004066E1 /* BABHeaderView.m */; };
 		26E4C7511992627000788FBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26E4C7501992627000788FBD /* Foundation.framework */; };
 		26E4C7531992627000788FBD /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26E4C7521992627000788FBD /* CoreGraphics.framework */; };
@@ -34,6 +35,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2611E8F51993E07600624CB2 /* BABLevelData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BABLevelData.h; sourceTree = "<group>"; };
+		2611E8F61993E07600624CB2 /* BABLevelData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BABLevelData.m; sourceTree = "<group>"; };
 		2674A6CC1993BA05004066E1 /* BABHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BABHeaderView.h; sourceTree = "<group>"; };
 		2674A6CD1993BA05004066E1 /* BABHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BABHeaderView.m; sourceTree = "<group>"; };
 		26E4C74D1992627000788FBD /* Bricks & Balls.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bricks & Balls.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -168,6 +171,8 @@
 				26E4C780199262C400788FBD /* BABGameBoardVC.h */,
 				26E4C781199262C400788FBD /* BABGameBoardVC.m */,
 				2674A6CF1993BCD3004066E1 /* Views */,
+				2611E8F51993E07600624CB2 /* BABLevelData.h */,
+				2611E8F61993E07600624CB2 /* BABLevelData.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -268,6 +273,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2611E8F71993E07600624CB2 /* BABLevelData.m in Sources */,
 				26E4C782199262C400788FBD /* BABGameBoardVC.m in Sources */,
 				26E4C7611992627000788FBD /* BABAppDelegate.m in Sources */,
 				26E4C75D1992627000788FBD /* main.m in Sources */,
