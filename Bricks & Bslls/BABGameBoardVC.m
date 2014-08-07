@@ -7,6 +7,7 @@
 //
 
 #import "BABGameBoardVC.h"
+#import "BABHeaderView.h"
 
 //// 3 lives
 //// after you hit floor start new ball and take away one life
@@ -31,12 +32,14 @@
     UIView *ball;
     UIView *paddle;
     
-    int Balls;
-    int scoreBoard;
+//    int Lives;
+//    int scoreBoard;
     
-    UILabel *score;
-    UILabel *ballCount;
+    BABHeaderView *headerView;
     
+//    UILabel *scoreBoard;
+//    UILabel *ballCount;
+//
     NSMutableArray *bricks;
 }
 
@@ -77,18 +80,22 @@
         brickItemBehavior.density = 1000000;
         [animator addBehavior:brickItemBehavior];
         
-        Balls = 3;
-        scoreBoard = 0;
+//        Lives = 3;
+//        score = 0;
         
-        score = [[UILabel alloc]initWithFrame:CGRectMake(10,SCREEN_HEIGHT - 215, 100, 30)];
-        score.text = @"Score: 0";
-        [self.view addSubview:score];
-        
-        ballCount = [[UILabel alloc]initWithFrame:CGRectMake(10,SCREEN_HEIGHT - 195, 100, 30)];
-        ballCount.text = @"Lives: 3";
-        [self.view addSubview:ballCount];
-    
-        [self createNewBall];
+        // alloc/init from the BAB Header View - so I can access its @property
+        headerView = [[BABHeaderView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 40)];
+        [self.view addSubview:headerView];
+//        
+//        scoreBoard = [[UILabel alloc]initWithFrame:CGRectMake(10,SCREEN_HEIGHT - 215, 100, 30)];
+//        scoreBoard.text = @"Score: 0";
+//        [self.view addSubview:scoreBoard];
+//        
+//        ballCount = [[UILabel alloc]initWithFrame:CGRectMake(10,SCREEN_HEIGHT - 195, 100, 30)];
+//        ballCount.text = @"Lives: 3";
+//        [self.view addSubview:ballCount];
+//    
+       
         
     
     }
@@ -105,7 +112,7 @@
     paddle.backgroundColor = [UIColor darkGrayColor];
     [self.view addSubview:paddle];
     
-    [self createNewBricks];
+    [self resetBricks];
     
 }
 
@@ -127,6 +134,8 @@
     [collisionBehavior addItem:paddle];
     [brickItemBehavior addItem:paddle];
     
+     [self createNewBall];
+    
 }
 
 - (void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier atPoint:(CGPoint)p
@@ -141,19 +150,24 @@
         
         // ball dies, lose life, create new ball
         
-        Balls --;
-        ballCount.text = [NSString stringWithFormat:@"Lives: %d",Balls];
+        // here 3 balls
+        // Balls --;
+//        ballCount.text = [NSString stringWithFormat:@"Lives: %d",headerView.lives];
         
-        if (Balls > 0)
+        if (headerView.lives > 0)
         {
             UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"You lost a Life" message:nil delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
             [alert show];
+            
             
         } else {
             
             UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Game Over" message:@"Ur Out of Lives" delegate:self cancelButtonTitle:@"Try Again" otherButtonTitles:nil];
             [alert show];
         }
+        
+        // here 4 balls
+        headerView.lives --;
         
     }
 }
@@ -165,6 +179,9 @@
     {
         if ([item1 isEqual:brick] || [item2 isEqual:brick])
         {
+            headerView.score +=100;
+//            scoreBoard.text = [NSString stringWithFormat:@"Score: %d",headerView.score];
+            
             [collisionBehavior removeItem:brick];
             [gravityBehavior addItem:brick];
             
@@ -175,8 +192,7 @@
             } completion:^(BOOL finished) {
                 [brick removeFromSuperview];
                 
-                scoreBoard +=50;
-                score.text = [NSString stringWithFormat:@"Score: %d",scoreBoard];
+               
                 
                 
             }];
@@ -186,26 +202,15 @@
     }
 }
 
-- (void)createNewBall
+- (void)resetBricks
 {
-
-        // VIEW DID LOAD
-    ball = [[UIView alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - 20) / 2.0, SCREEN_HEIGHT - 50, 20, 20)];
-    ball.layer.cornerRadius = ball.frame.size.width / 2.0;
-    ball.backgroundColor = [UIColor magentaColor];
-    [self.view addSubview:ball];
     
-    // VIEW WILL APPEAR - that the init method may not have finished
-    UIPushBehavior *pushBehavior = [[UIPushBehavior alloc]initWithItems:@[ball] mode:UIPushBehaviorModeInstantaneous];
-    pushBehavior.pushDirection = CGVectorMake(0.05, -0.05);
-    [animator addBehavior:pushBehavior];
-    
-    [collisionBehavior addItem:ball];
-    [ballItemBehavior addItem:ball];
-}
-
-- (void)createNewBricks
-{
+    for (UIView *brick in bricks) {
+        [brick removeFromSuperview];
+        [collisionBehavior removeItem:brick];
+        [brickItemBehavior removeItem:brick];
+        
+    }
     int colCount = 7;
     int rowCount = 4;
     int brickSpacimg = 8;
@@ -219,7 +224,7 @@
             float height = ((SCREEN_HEIGHT / 3) - (10 * rowCount)) / rowCount;
             
             float x = brickSpacimg + (width + 10) * col;
-            float y = brickSpacimg + (height + 10) * row;
+            float y = brickSpacimg + (height + 10) * row + 30;
             
             // create the brick
             UIView *brick = [[UIView alloc]initWithFrame:CGRectMake(x, y, width, height)];
@@ -228,13 +233,36 @@
             
             // aad the bricks to the array
             [bricks addObject:brick];
+            
+            [collisionBehavior addItem:brick];
+            [brickItemBehavior addItem:brick];
+            
         }
     }
 }
 
+- (void)createNewBall
+{
+
+        // VIEW DID LOAD
+    ball = [[UIView alloc]initWithFrame:CGRectMake(paddle.center.x, SCREEN_HEIGHT - 50, 20, 20)];
+    ball.layer.cornerRadius = ball.frame.size.width / 2.0;
+    ball.backgroundColor = [UIColor magentaColor];
+    [self.view addSubview:ball];
+    
+    // VIEW WILL APPEAR - that the init method may not have finished
+    UIPushBehavior *pushBehavior = [[UIPushBehavior alloc]initWithItems:@[ball] mode:UIPushBehaviorModeInstantaneous];
+    pushBehavior.pushDirection = CGVectorMake(0.05, -0.05);
+    [animator addBehavior:pushBehavior];
+    
+    [collisionBehavior addItem:ball];
+    [ballItemBehavior addItem:ball];
+}
+
+
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    if (Balls > 0)
+    if (headerView.lives > -1)
     {
         [self createNewBall];
     }
@@ -242,11 +270,11 @@
     {
         // reset the game
         [self createNewBall];
-        [self createNewBricks];
-        scoreBoard = 0;
-        score.text = @"Score: 0";
-        Balls = 3;
-        ballCount.text = @"Lives: 3";
+        [self resetBricks];
+        headerView.score = 0;
+//        scoreBoard.text = @"Score: 0";
+        headerView.lives = 3;
+//        ballCount.text = @"Lives: 3";
         
 
     }
