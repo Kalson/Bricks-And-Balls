@@ -12,6 +12,9 @@
 
 + (BABLevelData *) mainData;
 
-@property (nonatomic) int number;
+@property (nonatomic) int topScore;
+@property (nonatomic) int currentLevel;
+
+- (NSDictionary *)levelInfo;
 
 @end

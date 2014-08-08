@@ -13,16 +13,16 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    NSLog(@"number in appdelegate = %d",[BABLevelData mainData].number);
-    
-    [BABLevelData mainData].number = 4;
-    
-    NSLog(@"number set in appdelegate = %d",[BABLevelData mainData].number);
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
     // Override point for customization after application launch.
     
     self.window.rootViewController = [[BABGameBoardVC alloc]init];
+    
+   
+
+    
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
