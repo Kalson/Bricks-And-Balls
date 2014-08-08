@@ -10,4 +10,18 @@
 
 @implementation BABLevelData
 
++ (BABLevelData *)mainData
+{
+    static dispatch_once_t create;
+    static BABLevelData *singleton = nil;
+    
+    dispatch_once(&create, ^{
+        
+        singleton = [[BABLevelData alloc]init];
+    });
+    
+    return singleton;
+}
+
+
 @end

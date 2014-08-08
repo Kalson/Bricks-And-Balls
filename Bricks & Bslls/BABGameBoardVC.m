@@ -29,6 +29,7 @@
     UIGravityBehavior *gravityBehavior;
     UICollisionBehavior *collisionBehavior;
     UIAttachmentBehavior *attachmentBehavior;
+    UICollisionBehavior *paddleCollision;
     
     UIButton *startButton;
     
@@ -45,6 +46,12 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        
+        NSLog(@"number in appdelegate = %d",[BABLevelData mainData].number);
+        
+        [BABLevelData mainData].number = 8;
+        
+        NSLog(@"number set in appdelegate = %d",[BABLevelData mainData].number);
         
         bricks = [@[]mutableCopy];
         
@@ -80,6 +87,10 @@
         // alloc/init from the BAB Header View - so I can access its @property
         headerView = [[BABHeaderView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 40)];
         [self.view addSubview:headerView];
+        
+        paddleCollision = [[UICollisionBehavior alloc]init];
+        paddleCollision.collisionDelegate = self;
+        [animator addBehavior:paddleCollision];
  
        
         
@@ -170,6 +181,7 @@
     }
 }
 
+
 - (void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item1 withItem:(id<UIDynamicItem>)item2 atPoint:(CGPoint)p
 {
     // brick collision
@@ -179,15 +191,26 @@
         {
             headerView.score +=100;
             
-            // powerUp creation
-            UIView *powerupObjects = [[UIView alloc]initWithFrame:CGRectMake(brick.center.x,brick.center.y, 20, 20)];
-            powerupObjects.backgroundColor = [UIColor greenColor];
-            powerupObjects.layer.cornerRadius = 10;
-            [self.view addSubview:powerupObjects];
-            [gravityBehavior addItem:powerupObjects];
-
+            int random = arc4random_uniform(6);
             
-            int random = arc4random_uniform(10);
+            NSLog(@"random # = %d",random);
+            
+            if (random == 2) {
+                // powerUp creation
+                UIView *powerupObjects = [[UIView alloc]initWithFrame:CGRectMake(brick.center.x,brick.center.y, 20, 20)];
+                powerupObjects.backgroundColor = [UIColor greenColor];
+                powerupObjects.layer.cornerRadius = 10;
+                
+                [self.view addSubview:powerupObjects];
+                [gravityBehavior addItem:powerupObjects];
+                [collisionBehavior addItem:paddle];
+                [paddleCollision addItem:powerupObjects];
+
+            }
+            
+            // if the paddle is hit by the powerUp, randomize the paddle
+//            if (paddle = nil)
+          
             
             [collisionBehavior removeItem:brick];
             [gravityBehavior addItem:brick];

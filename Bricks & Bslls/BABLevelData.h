@@ -10,4 +10,8 @@
 
 @interface BABLevelData : NSObject
 
++ (BABLevelData *) mainData;
+
+@property (nonatomic) int number;
+
 @end

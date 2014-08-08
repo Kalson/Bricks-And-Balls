@@ -83,6 +83,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2611E8F8199506E300624CB2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2611E8F51993E07600624CB2 /* BABLevelData.h */,
+				2611E8F61993E07600624CB2 /* BABLevelData.m */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
 		2674A6CF1993BCD3004066E1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -95,6 +104,7 @@
 		26E4C7441992627000788FBD = {
 			isa = PBXGroup;
 			children = (
+				2611E8F8199506E300624CB2 /* Models */,
 				26E4C77F1992629100788FBD /* Controllers */,
 				26E4C7561992627000788FBD /* Bricks & Balls */,
 				26E4C76F1992627000788FBD /* Bricks & BallsTests */,
@@ -171,8 +181,6 @@
 				26E4C780199262C400788FBD /* BABGameBoardVC.h */,
 				26E4C781199262C400788FBD /* BABGameBoardVC.m */,
 				2674A6CF1993BCD3004066E1 /* Views */,
-				2611E8F51993E07600624CB2 /* BABLevelData.h */,
-				2611E8F61993E07600624CB2 /* BABLevelData.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";

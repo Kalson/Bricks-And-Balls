@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "BABLevelData.h"
+
 @interface BABGameBoardVC : UIViewController
 
 @end
