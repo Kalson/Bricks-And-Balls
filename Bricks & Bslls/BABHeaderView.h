@@ -12,5 +12,6 @@
 
 @property (nonatomic) int lives;
 @property (nonatomic) int score;
+@property (nonatomic) int level;
 
 @end

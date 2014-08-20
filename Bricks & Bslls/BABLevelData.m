@@ -32,23 +32,46 @@
     self = [super init];
     if (self)
     {
+        // now to retrive the save data
+            NSUserDefaults *nsDefaults = [NSUserDefaults standardUserDefaults];
+        self.topScore = (int)[nsDefaults integerForKey:@"topScore"];
+        
         levels = @[
                    @{
                        @"cols": @7,
-                       @"rows": @3
+                       @"rows": @2
                      },
                    @{
                        @"cols": @7,
-                       @"rows": @4
+                       @"rows": @3
                        },
-//                   @{
-//                       @"cols": @7,
-//                       @"rows": @4
-//                       },
+                   @{
+                       @"cols": @7,
+                       @"rows": @3
+                       }
                    
                    ];
     }
     return self;
+}
+
+- (void)setTopScore:(int)topScore
+{
+    _topScore = topScore;
+    
+    NSUserDefaults *nsDefaults = [NSUserDefaults standardUserDefaults];
+    [nsDefaults setInteger:topScore forKey:@"topScore"];
+    [nsDefaults synchronize]; // synchronize saves it
+}
+
+- (void)setCurrentLevel:(int)currentLevel
+{
+    _currentLevel = currentLevel;
+    
+    if (currentLevel >= levels.count - 1)
+    {
+        _currentLevel = 0;
+    }
 }
 
 - (NSDictionary *)levelInfo

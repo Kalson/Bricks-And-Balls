@@ -18,6 +18,9 @@
 //// randonly change size of paddle when powerup hit paddle
 
 
+//// ball2 not recognizing the only @floor as a boundary when instead all boundary
+//// UIAlertview to set for both ball1 and 2
+
 @interface BABGameBoardVC () <UICollisionBehaviorDelegate, UIAlertViewDelegate>
 @end
 
@@ -30,16 +33,22 @@
     UIGravityBehavior *gravityBehavior;
     UICollisionBehavior *collisionBehavior;
     UIAttachmentBehavior *attachmentBehavior;
-    UICollisionBehavior *paddleCollision;
+    UICollisionBehavior *powerupCollision;
+    UIPushBehavior *pushBehavior;
     
     UIButton *startButton;
     
     UIView *ball;
+    //    NSMutableArray *balls;
+    UIView *ball2;
     UIView *paddle;
-    UIView *powerupObjects;
+    
+    UIView *powerUp;
+    
+    int random;
     
     BABHeaderView *headerView;
-
+    
     NSMutableArray *bricks;
 }
 
@@ -48,8 +57,11 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-     
+        
         bricks = [@[]mutableCopy];
+        
+        //        balls = [@[]mutableCopy];
+        
         
         // since were in a view controller the self.view will be the reference
         animator = [[UIDynamicAnimator alloc]initWithReferenceView:self.view];
@@ -63,9 +75,9 @@
         
         gravityBehavior = [[UIGravityBehavior alloc]init];
         [animator addBehavior:gravityBehavior];
-       
+        
         collisionBehavior = [[UICollisionBehavior alloc]init];
-//      collisionBehavior.translatesReferenceBoundsIntoBoundary = YES;
+        //      collisionBehavior.translatesReferenceBoundsIntoBoundary = YES;
         
         // create own boundary to know when it hits the ground
         [collisionBehavior addBoundaryWithIdentifier:@"floor" fromPoint:CGPointMake(0, SCREEN_HEIGHT) toPoint:CGPointMake(SCREEN_WIDTH, SCREEN_HEIGHT + 20)];
@@ -84,13 +96,13 @@
         headerView = [[BABHeaderView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 40)];
         [self.view addSubview:headerView];
         
-        paddleCollision = [[UICollisionBehavior alloc]init];
-        paddleCollision.collisionDelegate = self;
-        [animator addBehavior:paddleCollision];
- 
-       
+        powerupCollision = [[UICollisionBehavior alloc]init];
+        powerupCollision.collisionDelegate = self;
+        [animator addBehavior:powerupCollision];
         
-    
+        
+        NSLog(@"Top Score : %d",[BABLevelData mainData].topScore);
+        
     }
     return self;
 }
@@ -111,7 +123,7 @@
     startButton.backgroundColor = [UIColor darkGrayColor];
     [self.view addSubview:startButton];
     
-//    [self resetBricks];
+    //    [self resetBricks];
     
 }
 
@@ -151,8 +163,10 @@
     
     [collisionBehavior addItem:paddle];
     [brickItemBehavior addItem:paddle];
-    [paddleCollision addItem:paddle];
-
+    
+    [powerupCollision addItem:paddle];
+    // means only the paddle amd the powerup can collide
+    
     
 }
 
@@ -161,38 +175,56 @@
     // When the ball hits the floor
     if ([@"floor" isEqualToString:(NSString *)identifier])
     {
-//        UIView *ballItem = (UIView *)item;
-//        
-//        [collisionBehavior removeItem:ballItem];
-//        [ballItem removeFromSuperview];
+        //        UIView *ballItem = (UIView *)item;
+        //
+        //        [collisionBehavior removeItem:ballItem];
+        //        [ballItem removeFromSuperview];
+        
+        //        [balls removeObject;ballitem];
+        
         
         [collisionBehavior removeItem:ball];
         [ball removeFromSuperview];
+        
+        
         
         // ball dies, lose life, create new ball
         
         // here 3 balls
         // Balls --;
-//        ballCount.text = [NSString stringWithFormat:@"Lives: %d",headerView.lives];
+        //        ballCount.text = [NSString stringWithFormat:@"Lives: %d",headerView.lives];
         
         if (headerView.lives > 0)
         {
+            //            if (balls.count == 0) {
+            //                for (UIview *ball in balls)
+            //                {
+            //                    [collisionBehavior removeItem:ball];
+            //                    [ball removeFromSuperview];
+            //                }
+            //            }
             UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"You lost a Life" message:nil delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
             [alert show];
             
-            
-        } else {
-            
-            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Game Over" message:@"Ur Out of Lives" delegate:self cancelButtonTitle:@"Try Again" otherButtonTitles:nil];
-            [alert show];
+            [self createNewBall];
         }
-        
-        // here 4 balls
-        headerView.lives --;
-        
+        else {
+            //
+            ////            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Game Over" message:@"Your Out of Lives" delegate:self cancelButtonTitle:@"Try Again" otherButtonTitles:nil];
+            ////            [alert show];
+            //        }
+            
+            // here 4 balls
+            headerView.lives --;
+            //
+            //    } else {
+            //        [collisionBehavior removeItem:ball2];
+            //        //        [ball2 removeFromSuperview];
+            //    }
+            
+        }
     }
 }
-
 
 - (void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item1 withItem:(id<UIDynamicItem>)item2 atPoint:(CGPoint)p
 // method b/w 2 items item 1 or 2
@@ -204,20 +236,40 @@
         {
             headerView.score +=100;
             
-            int random = arc4random_uniform(4);
+            random = arc4random_uniform(1);
             
             NSLog(@"random # = %d",random);
             
-            if (random == 2) {
-                // powerUp creation
-                powerupObjects = [[UIView alloc]initWithFrame:CGRectMake(brick.center.x,brick.center.y, 20, 20)];
-                powerupObjects.backgroundColor = [UIColor greenColor];
-                powerupObjects.layer.cornerRadius = 10;
-                [self.view addSubview:powerupObjects];
+            powerUp = [[UIView alloc]initWithFrame:CGRectMake(brick.center.x,brick.center.y, 15, 15)];
+            
+            if (random == 4) {
+                // Big Paddle
+                powerUp.backgroundColor = [UIColor greenColor];
                 
-                [gravityBehavior addItem:powerupObjects];
-                [paddleCollision addItem:powerupObjects];
+            } else if (random == 1) {
+                // Small Paddle
+                powerUp.backgroundColor = [UIColor redColor];
+                
+            } else if (random == 2) {
+                // Big Ball
+                powerUp.backgroundColor = [UIColor brownColor];
+                
+            } else if  (random == 3) {
+                // Small Ball
+                powerUp.backgroundColor = [UIColor orangeColor];
+                
+            } else if (random == 0) {
+                // Mutli Ball
+                powerUp.backgroundColor = [UIColor blackColor];
             }
+            
+            
+            powerUp.layer.cornerRadius = 7.5;
+            [self.view addSubview:powerUp];
+            [gravityBehavior addItem:powerUp];
+            [powerupCollision addItem:powerUp];
+            
+//             powerUp.tag = arc4random(4);
             
             [collisionBehavior removeItem:brick];
             [gravityBehavior addItem:brick];
@@ -225,9 +277,9 @@
             [bricks removeObjectIdenticalTo:brick];
             
             [UIView animateWithDuration:0.3 animations:^{
-            brick.alpha = 0;
-            
-
+                brick.alpha = 0;
+                
+                
             } completion:^(BOOL finished) {
                 
                 [brick removeFromSuperview];
@@ -237,31 +289,128 @@
                     [collisionBehavior removeItem:ball];
                     [ball removeFromSuperview];
                     
+                    //                    [collisionBehavior removeItem:ball2];
+                    //                    [ball2 removeFromSuperview];
+                    
+                    // new level
+                    headerView.level ++;
                     [BABLevelData mainData].currentLevel++;
                     
                     [self startNewGame];
                 }
+                
+                //                if (headerView.lives == 0)
+                //                {
+                //                    [BABLevelData mainData].currentLevel--;
+                //                }
+                //
             }];
             
             
         }
     }
+    //    for (UIView *powerUp in [powerUps copy])
+    //    {
+    //
+    //    }
     
-    if ([item1 isEqual:powerupObjects] || [item2 isEqual:powerupObjects])
+    if ([item1 isEqual:powerUp] || [item2 isEqual:powerUp])
     {
-        [paddleCollision removeItem:powerupObjects];
-        [powerupObjects removeFromSuperview];
+        [powerupCollision removeItem:powerUp];
+        [powerUp removeFromSuperview];
         
+        //        [powerUps removeobjectIdenticalto:powerUp];
         NSLog(@"boom");
         
-        powerupObjects = nil;
-        
-        if (powerupObjects == nil)
+        // paddle color change
+        if ([powerUp.backgroundColor isEqual:[UIColor greenColor]])
         {
-            CGRect frame = paddle.frame;
-            frame.size.width = arc4random_uniform(150) + 20;
-            paddle.frame = frame; // why pass it again?
+            paddle.backgroundColor = [UIColor greenColor];
+        } else if ([powerUp.backgroundColor isEqual:[UIColor redColor]])
+        {
+            paddle.backgroundColor = [UIColor redColor];
+        } else if ([powerUp.backgroundColor isEqual:[UIColor brownColor]])
+        {
+            paddle.backgroundColor = [UIColor brownColor];
+        } else if ([powerUp.backgroundColor isEqual:[UIColor orangeColor]])
+        {
+            paddle.backgroundColor = [UIColor orangeColor];
+        } else if ([powerUp.backgroundColor isEqual:[UIColor blackColor]])
+        {
+            paddle.backgroundColor = [UIColor blackColor];
         }
+        
+        //        NSLog(@"tag %d",powerUp.tag);
+        
+        //        switch (powerUp.tag
+        //                ) {
+        //            case 0: // small paddle
+        //            {
+        //                CGRect frame = paddle.frame;
+        //                frame.size.width = (frame.size.width < 120) ? frame.size.width - 20 : frame.size.width;
+        //                paddle.frame = frame;
+        //            }
+        //                break;
+        //
+        //            case 1: // bigget paddle
+        //            {
+        //                [self createNewBall];
+        //            }
+        //            default:
+        //                break;
+        
+        
+        
+        
+        
+        
+        powerUp = nil;
+        
+        if (powerUp == nil)
+        {
+            if (random == 4) {
+                // big paddle = green ball
+                CGRect frame = paddle.frame;
+                frame.size.width = arc4random_uniform(150) + 20;
+                paddle.frame = frame; // why pass it again?
+                
+            } else if (random == 1) {
+                // small paddle =  red ball
+                CGRect frame = paddle.frame;
+                frame.size.width = arc4random_uniform(20) + 20;
+                paddle.frame = frame; // why pass it again?
+                
+            } else if (random == 2) {
+                // big ball = brown ball
+                CGRect frame = ball.frame;
+                frame.size.width = arc4random_uniform(50) + 20;
+                frame.size.height = arc4random_uniform(50) + 20;
+                ball.frame = frame; // why pass it again?
+                
+            } else if (random == 3) {
+                // small ball = orange ball
+                CGRect frame = ball.frame;
+                frame.size.width = arc4random_uniform(20) + 20;
+                frame.size.height = arc4random_uniform(20) + 20;
+                ball.frame = frame; // why pass it again?
+                
+            } else if (random == 0) {
+                // multi ball = black ball
+                ball2 = [[UIView alloc]initWithFrame:CGRectMake(paddle.center.x, SCREEN_HEIGHT - 50, 20, 20)];
+                ball2.layer.cornerRadius = ball2.frame.size.width / 2.0;
+                ball2.backgroundColor = [UIColor yellowColor];
+                [self.view addSubview:ball2];
+                
+                pushBehavior = [[UIPushBehavior alloc]initWithItems:@[ball2] mode:UIPushBehaviorModeInstantaneous];
+                pushBehavior.pushDirection = CGVectorMake(0.08, -0.08);
+                [animator addBehavior:pushBehavior];
+                
+                [collisionBehavior addItem:ball2];
+                [ballItemBehavior addItem:ball2];
+            }
+            
+        }
+        
     }
 }
 
@@ -277,8 +426,8 @@
     }
     // brick layout creation
     int colCount = [[[BABLevelData mainData]levelInfo][@"cols"]intValue];
-//    int colCount = 7;
-//    int rowCount = 4;
+    //    int colCount = 7;
+    //    int rowCount = 4;
     int rowCount = [[[BABLevelData mainData]levelInfo][@"rows"]intValue];
     int brickSpacimg = 8;
     
@@ -299,7 +448,8 @@
             CGFloat hue = (arc4random() % 256 / 256.0);
             CGFloat saturation = (arc4random() % 228 / 256.0) + 0.5;
             CGFloat brightness = (arc4random() % 128 / 256.0) + 0.5;
-            brick.backgroundColor = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
+            brick.layer.borderColor = [[UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1]CGColor];
+            brick.layer.borderWidth = 10;
             
             [self.view addSubview:brick];
             
@@ -319,15 +469,15 @@
 
 - (void)createNewBall
 {
-
-        // VIEW DID LOAD
+    
+    // VIEW DID LOAD
     ball = [[UIView alloc]initWithFrame:CGRectMake(paddle.center.x, SCREEN_HEIGHT - 50, 20, 20)];
     ball.layer.cornerRadius = ball.frame.size.width / 2.0;
     ball.backgroundColor = [UIColor magentaColor];
     [self.view addSubview:ball];
     
     // VIEW WILL APPEAR - that the init method may not have finished
-    UIPushBehavior *pushBehavior = [[UIPushBehavior alloc]initWithItems:@[ball] mode:UIPushBehaviorModeInstantaneous];
+    pushBehavior = [[UIPushBehavior alloc]initWithItems:@[ball] mode:UIPushBehaviorModeInstantaneous];
     pushBehavior.pushDirection = CGVectorMake(0.08, -0.08);
     [animator addBehavior:pushBehavior];
     
@@ -346,15 +496,16 @@
     {
         // reset the game
         [self startNewGame];
-    
+        
         for (UIView *brick in bricks)
         {
             [brick removeFromSuperview];
             [collisionBehavior removeItem:brick];
             [brickItemBehavior removeItem:brick];
-    
+            //            [BABLevelData mainData].currentLevel--;
+            
         }
-
+        
     }
 }
 
@@ -383,7 +534,7 @@
     
     attachmentBehavior.anchorPoint = CGPointMake(dragX, paddle.center.y);
     
-//    paddle.center = CGPointMake(location.x, paddle.center.y);
+    //    paddle.center = CGPointMake(location.x, paddle.center.y);
 }
 
 - (BOOL)prefersStatusBarHidden{return YES;}
