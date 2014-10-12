@@ -116,13 +116,13 @@
     paddle.backgroundColor = [UIColor darkGrayColor];
     [self.view addSubview:paddle];
     
-    startButton = [[UIButton alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - 100) / 2.0, (SCREEN_HEIGHT - 100) / 2.0, 100, 100)];
+    startButton = [[UIButton alloc]initWithFrame:CGRectMake(SCREEN_WIDTH - 100, (SCREEN_HEIGHT - 320) / 2.0, 100, 100)];
     [startButton setTitle:@"START" forState:UIControlStateNormal];
     [startButton addTarget:self action:@selector(startGame) forControlEvents:UIControlEventTouchUpInside];
     startButton.layer.cornerRadius = 50;
     startButton.backgroundColor = [UIColor darkGrayColor];
     [self.view addSubview:startButton];
-    
+        
     //    [self resetBricks];
     
 }
