@@ -112,16 +112,22 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    
     paddle = [[UIView alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - 100) / 2.0, SCREEN_HEIGHT - 10, 100, 4)];
     paddle.backgroundColor = [UIColor darkGrayColor];
+    paddle.hidden = YES;
     [self.view addSubview:paddle];
     
-    startButton = [[UIButton alloc]initWithFrame:CGRectMake(SCREEN_WIDTH - 100, (SCREEN_HEIGHT - 320) / 2.0, 100, 100)];
+    startButton = [[UIButton alloc]initWithFrame:CGRectMake((SCREEN_WIDTH - 100) / 2, (SCREEN_HEIGHT - 100) / 2.0, 100, 100)];
     [startButton setTitle:@"START" forState:UIControlStateNormal];
     [startButton addTarget:self action:@selector(startGame) forControlEvents:UIControlEventTouchUpInside];
     startButton.layer.cornerRadius = 50;
     startButton.backgroundColor = [UIColor darkGrayColor];
     [self.view addSubview:startButton];
+    
+    NSLog(@"start: %@",startButton);
+    
+    
         
     //    [self resetBricks];
     
@@ -130,6 +136,8 @@
 - (void)startGame
 {
     [startButton removeFromSuperview];
+    paddle.hidden = NO;
+
     
     [self createNewBall];
     [self resetBricks];
